@@ -11,10 +11,14 @@ import (
 type EventType string
 
 const (
-	EVENT_TYPE_CREATE EventType = "CreateEvent"
-	EVENT_TYPE_PUSH   EventType = "PushEvent"
-	EVENT_TYPE_ISSUES EventType = "IssuesEvent"
-	EVENT_TYPE_WATCH  EventType = "WatchEvent"
+	EVENT_TYPE_CREATE            EventType = "CreateEvent"
+	EVENT_TYPE_PUSH              EventType = "PushEvent"
+	EVENT_TYPE_ISSUES            EventType = "IssuesEvent"
+	EVENT_TYPE_WATCH             EventType = "WatchEvent"
+	EVENT_TYPE_PR                EventType = "PullRequestEvent"
+	EVENT_TYPE_PR_REVIEW         EventType = "PullRequestReviewEvent"
+	EVENT_TYPE_PR_REVIEW_COMMENT EventType = "PullRequestReviewCommentEvent"
+	EVENT_TYPE_RELEASE           EventType = "ReleaseEvent"
 )
 
 type Event struct {
@@ -67,6 +71,54 @@ func (e Event) ProcessWatchEvent() {
 	}
 }
 
+func (e Event) ProcessPullRequestEvent() {
+	action := e.Payload.Action
+	switch action {
+	case "opened":
+		fmt.Printf("Opened a pull request in %s\n", e.Repo.Name)
+	case "closed":
+		fmt.Printf("Closed a pull request in %s\n", e.Repo.Name)
+	case "merged":
+		fmt.Printf("Merged a pull request in %s\n", e.Repo.Name)
+	case "reopened":
+		fmt.Printf("Reopened a pull request in %s\n", e.Repo.Name)
+	case "assigned":
+		fmt.Printf("Assigned a user to a pull request in %s\n", e.Repo.Name)
+	case "unassigned":
+		fmt.Printf("Unassigned a user from a pull request in %s\n", e.Repo.Name)
+	case "labeled":
+		fmt.Printf("Added a label to a pull request in %s\n", e.Repo.Name)
+	case "unlabeled":
+		fmt.Printf("Removed a label from a pull request in %s\n", e.Repo.Name)
+	}
+}
+
+func (e Event) ProcessPullRequestReviewEvent() {
+	action := e.Payload.Action
+	switch action {
+	case "created":
+		fmt.Printf("Created a review to a pull request in %s\n", e.Repo.Name)
+	case "updated":
+		fmt.Printf("Updated a review to a pull request in %s\n", e.Repo.Name)
+	case "dismissed":
+		fmt.Printf("Dismissed a review from a pull request in %s\n", e.Repo.Name)
+	}
+}
+
+func (e Event) ProcessPullRequestReviewCommentEvent() {
+	action := e.Payload.Action
+	switch action {
+	case "created":
+		fmt.Printf("Commented on a pull request in %s\n", e.Repo.Name)
+	default:
+		fmt.Printf("Unknown PullRequestReviewCommentEvent action: %q\n", action)
+	}
+}
+
+func (e Event) ProcessReleaseEvent() {
+	fmt.Printf("Published a release in %s\n", e.Repo.Name)
+}
+
 func (e Event) ProcessEvent() {
 	switch e.Type {
 	case EVENT_TYPE_PUSH:
@@ -77,6 +129,14 @@ func (e Event) ProcessEvent() {
 		e.ProcessCreateEvent()
 	case EVENT_TYPE_WATCH:
 		e.ProcessWatchEvent()
+	case EVENT_TYPE_PR:
+		e.ProcessPullRequestEvent()
+	case EVENT_TYPE_PR_REVIEW:
+		e.ProcessPullRequestReviewEvent()
+	case EVENT_TYPE_PR_REVIEW_COMMENT:
+		e.ProcessPullRequestReviewCommentEvent()
+	case EVENT_TYPE_RELEASE:
+		e.ProcessReleaseEvent()
 	default:
 		fmt.Printf("Skipping unknown event of type %s\n", e.Type)
 	}
