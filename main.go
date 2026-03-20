@@ -36,6 +36,16 @@ func main() {
 	}
 	defer r.Body.Close()
 
+	if r.StatusCode == http.StatusNotFound {
+		fmt.Printf("Error: User '%s' not found.\n", username)
+		os.Exit(1)
+	}
+
+	if r.StatusCode != http.StatusOK {
+		fmt.Printf("GitHub API failed with status: %s\n", r.Status)
+		os.Exit(1)
+	}
+
 	var events event.Events
 	err = json.NewDecoder(r.Body).Decode(&events)
 	if err != nil {

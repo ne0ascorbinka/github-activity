@@ -71,7 +71,7 @@ func (e Event) ProcessWatchEvent() {
 	case "started":
 		fmt.Printf("Starred %s\n", e.Repo.Name)
 	default:
-		fmt.Printf("Unknown WatchEvent action: %s\n", action)
+		fmt.Printf("Unknown WatchEvent action: %q\n", action)
 	}
 }
 
@@ -224,6 +224,6 @@ func (e Event) ProcessEvent() {
 	case EVENT_TYPE_PUBLIC:
 		e.ProcessPublicEvent()
 	default:
-		fmt.Printf("Skipping unknown event of type %s\n", e.Type)
+		fmt.Printf("Skipping unknown event of type %q\n", e.Type)
 	}
 }
